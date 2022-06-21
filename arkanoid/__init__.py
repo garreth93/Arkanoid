@@ -1,7 +1,10 @@
 # Especificaciones de pantalla
-ANCHO = 800
-ALTO = 600
+ANCHO = 600
+ALTO = 800
 
-# Color de texto
-
+# Colores
 COLOR_TEXTO = (255, 255, 255)
+COLOR_FONDO = (0,0,0)
+
+# FPS
+FPS = 60

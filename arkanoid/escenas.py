@@ -1,12 +1,15 @@
+import sys
 import os
 import pygame as pg
 
-from . import ANCHO, ALTO, COLOR_TEXTO
+from . import ANCHO, ALTO, COLOR_TEXTO, COLOR_FONDO, FPS
+from .entidades import Raqueta 
 
 class Escena:
     def __init__(self, pantalla: pg.Surface):
         self.pantalla = pantalla
-        
+        self.reloj = pg.time.Clock()
+
     def bucle_principal(self):
         '''Este metodo debe ser implementado por cada una de las escenas
         en funcion de lo que esten esperando hasta la condición de salida.'''
@@ -17,23 +20,21 @@ class Portada(Escena):
         super().__init__(pantalla)
         self.logo = pg.image.load(
             os.path.join("resources", "images", "arkanoid_name.png"))
-        
-        self.mensaje_start_font = pg.font.Font(os.path.join("resources", "fonts", "CabinSketch-Bold.ttf"), 30)
+        font_file = os.path.join("resources", "fonts", "CabinSketch-Bold.ttf")
+        self.mensaje_start_font = pg.font.Font(font_file, 30)
         
     def bucle_principal(self):        
         '''Este es el bucle principal.'''
         salir = False
         while not salir:
             for event in pg.event.get():
-                if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_SPACE:
-                        salir = True
-                    
+                if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                    salir = True                   
                 
                 if event.type == pg.QUIT:
-                    salir = True
+                    sys.exit()
                         
-            self.pantalla.fill((99, 0, 0))
+            self.pantalla.fill((COLOR_FONDO))
             self.pintar_logo()
             self.pintar_texto()
             pg.display.flip()
@@ -53,19 +54,32 @@ class Portada(Escena):
         self.pantalla.blit(texto, (pos_x, pos_y))
             
 class Partida(Escena):
+    def __init__(self, pantalla: pg.Surface):
+        super().__init__(pantalla)
+        bg_file = os.path.join("resources", "images", "background.jpg")
+        self.fondo = pg.image.load(bg_file)   
+        self.jugador = Raqueta()     
+
+    def pintar_fondo(self):
+        self.pantalla.blit(self.fondo, (0,0))
+
     def bucle_principal(self):
         '''Este es el bucle principal.'''
         salir = False
         while not salir:
+            self.reloj.tick(FPS)
             for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    salir = True
-                elif event.type == pg.KEYDOWN:
-                    if event.key == pg.K_q:
-                        salir == True
+                if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                    salir = True                   
                 
-            self.pantalla.fill((0, 0, 99))
+                if event.type == pg.QUIT:
+                    sys.exit()
+                
+            self.pintar_fondo()
+            self.jugador.update()
+            self.pantalla.blit(self.jugador.image, self.jugador.rect)
             pg.display.flip()
+
 
 class HallOfFame(Escena):
     def bucle_principal(self):
@@ -73,11 +87,11 @@ class HallOfFame(Escena):
         salir = False
         while not salir:
             for event in pg.event.get():
+                if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                    salir = True                   
+                
                 if event.type == pg.QUIT:
-                    salir = True
-                if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_q:
-                        salir == True
+                    sys.exit()
                 
             self.pantalla.fill((0, 99, 0))
             pg.display.flip()

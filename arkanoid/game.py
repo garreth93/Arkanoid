@@ -1,8 +1,8 @@
 import os
 import pygame as pg
 
-from arkanoid import ALTO, ANCHO
 from arkanoid.escenas import Portada, Partida, HallOfFame
+from arkanoid import ALTO, ANCHO
 
 class Arkanoid:
     def __init__(self):
