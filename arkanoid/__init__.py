@@ -8,3 +8,7 @@ COLOR_FONDO = (0,0,0)
 
 # FPS
 FPS = 60
+
+# Velocidad pala
+
+SPEED_PALA = 1.5

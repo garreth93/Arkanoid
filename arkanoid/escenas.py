@@ -58,28 +58,49 @@ class Partida(Escena):
         super().__init__(pantalla)
         bg_file = os.path.join("resources", "images", "background.jpg")
         self.fondo = pg.image.load(bg_file)   
-        self.jugador = Raqueta()     
+        self.jugador = Raqueta(self)     
 
     def pintar_fondo(self):
         self.pantalla.blit(self.fondo, (0,0))
 
     def bucle_principal(self):
         '''Este es el bucle principal.'''
-        salir = False
-        while not salir:
-            self.reloj.tick(FPS)
-            for event in pg.event.get():
-                if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-                    salir = True                   
-                
-                if event.type == pg.QUIT:
-                    sys.exit()
-                
-            self.pintar_fondo()
-            self.jugador.update()
-            self.pantalla.blit(self.jugador.image, self.jugador.rect)
+        self.salir = False
+        while not self.salir:
+            self.reloj.tick(FPS)            # Seteo del tempo del juego
+            
+            self.revisa_eventos()           # Revisa los eventos pulsaciones y demás
+            self.pintar_fondo()             
+            self.jugador.update()           # Refresca ubicacion y sprite del jugador
+            self.jugador.blitPala()         # Pinta al jugador
             pg.display.flip()
 
+    def revisa_eventos(self):
+        ''' Esto va revisar si hay eventos en el bucle principal'''
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                sys.exit()
+            elif event.type == pg.KEYDOWN:
+                self.revisa_keydown(event)
+            elif event.type == pg.KEYUP:
+                self.revisa_upkey(event)           
+            
+    def revisa_keydown(self, event):
+        '''Responde a las PULSACIONES de las teclas'''
+        if event.key == pg.K_RIGHT:
+            self.jugador.mueve_derecha = True
+        elif event.key == pg.K_LEFT:
+            self.jugador.mueve_izquierda = True
+        elif event.key == pg.K_SPACE:
+            self.salir = True
+        
+    def revisa_upkey(self, event):
+        '''Responde a las LIBERACIONES de las teclas'''
+        if event.key == pg.K_RIGHT:
+            self.jugador.mueve_derecha = False
+        if event.key == pg.K_LEFT:
+            self.jugador.mueve_izquierda = False
+        
 
 class HallOfFame(Escena):
     def bucle_principal(self):
