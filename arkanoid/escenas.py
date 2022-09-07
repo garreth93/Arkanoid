@@ -3,7 +3,7 @@ import os
 import pygame as pg
 
 from . import ANCHO, ALTO, COLOR_TEXTO, COLOR_FONDO, FPS
-from .entidades import Raqueta 
+from .entidades import Raqueta, Ladrillo, Pelota
 
 class Escena:
     def __init__(self, pantalla: pg.Surface):
@@ -59,6 +59,8 @@ class Partida(Escena):
         bg_file = os.path.join("resources", "images", "background.jpg")
         self.fondo = pg.image.load(bg_file)   
         self.jugador = Raqueta(self)     
+        self.crear_muro()
+        self.pelotita = Pelota(midbottom=self.jugador.rect.midtop)
 
     def pintar_fondo(self):
         self.pantalla.blit(self.fondo, (0,0))
@@ -66,14 +68,44 @@ class Partida(Escena):
     def bucle_principal(self):
         '''Este es el bucle principal.'''
         self.salir = False
+        self.partida_iniciada = False
         while not self.salir:
             self.reloj.tick(FPS)            # Seteo del tempo del juego
             
             self.revisa_eventos()           # Revisa los eventos pulsaciones y demás
             self.pintar_fondo()             
             self.jugador.update()           # Refresca ubicacion y sprite del jugador
-            self.jugador.blitPala()         # Pinta al jugador
+            self.pelotita.update(self.jugador, self.partida_iniciada)
+            self.pelotita.hay_colision(self.jugador)
+            golpeados = pg.sprite.spritecollide(self.pelotita, self.ladrillos, True)
+            if len(golpeados) > 0:
+                self.pelotita.velocidad_y *= -1
+
+            self.jugador.blitPala()        # Pinta al jugador
+
+            # pintar el muro
+            self.ladrillos.draw(self.pantalla)
+
+            # pintar la pelota
+            self.pantalla.blit(self.pelotita.image, self.pelotita.rect)
+
             pg.display.flip()
+    
+    def crear_muro(self):
+        num_filas = 5
+        num_columnas = 6
+        self.ladrillos = pg.sprite.Group()
+        self.ladrillos.empty()
+
+        margen_y = 40
+
+        for fila in range(num_filas):
+            for columna in range(num_columnas):
+                ladrillo = Ladrillo(fila, columna)
+                margen_x = (ANCHO - ladrillo.image.get_width()*num_columnas) / 2
+                ladrillo.rect.x += margen_x
+                ladrillo.rect.y += margen_y
+                self.ladrillos.add(ladrillo)
 
     def revisa_eventos(self):
         ''' Esto va revisar si hay eventos en el bucle principal'''
@@ -92,7 +124,7 @@ class Partida(Escena):
         elif event.key == pg.K_LEFT:
             self.jugador.mueve_izquierda = True
         elif event.key == pg.K_SPACE:
-            self.salir = True
+            self.partida_iniciada = True
         
     def revisa_upkey(self, event):
         '''Responde a las LIBERACIONES de las teclas'''

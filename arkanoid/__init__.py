@@ -11,4 +11,4 @@ FPS = 60
 
 # Velocidad pala
 
-SPEED_PALA = 1.5
+SPEED_PALA = 5
